@@ -1,0 +1,28 @@
+const Embed1 = new Discord.MessageEmbed()
+
+	.setColor("")
+	.setTitle("")
+	.setURL("")
+	.setAuthor("", "", "")
+	.setDescription("")
+	.setThumbnail("")
+	.addField("", "")
+	.addBlankField()
+	.addField("", "", true)
+	.addField("", "", true)
+	.addField("", "", true)
+	.setImage("")
+	.setTimestamp()
+	.setFooter("", "");
+  
+  Color        左の色
+  Title        タイトル
+  URL          タイトルをクリックして飛ぶURL（ない場合リンク化しない）
+  Author       投稿者の名前, アバターの画像, リンク？
+  Description  タイトル下の説明文
+  Thumbnail    右上の画像
+  Field        フィールド　複数個可　インライン可
+  BlankField   空白のフィールド
+  Image        どでかい画像
+  TimeStamp    タイムスタンプ　一番下 カッコ内入力不要
+  Footer       一番下の文字, 画像
