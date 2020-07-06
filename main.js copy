@@ -1,0 +1,562 @@
+// Response for Uptime Robot
+const http = require("http");
+http
+  .createServer(function(request, response) {
+    response.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
+    response.end("Discord bot は 動いています\n");
+  })
+  .listen(3000);
+
+// Discord bot implements
+const discord = require("discord.js");
+const client = new discord.Client();
+const Eris = require("eris");
+const bot = new Eris(process.env.DISCORD_BOT_TOKEN);
+
+var args = 0;
+var command = 0;
+
+const prefix = "$";
+const { RichEmbed } = require("discord.js");
+var setroomid = null; // DefaultRoomID
+var ReactuserList = []; // リアクションしたユーザー
+
+var RcheckOn = false;
+
+client.on("ready", message => {
+  client.user.setActivity("川らない日々", { type: "LISTENING" });
+  //  console.log(bot.channelGuildMap);
+  console.log("入っているサーバー:");
+  var ServerList = client.guilds.map(a => a.name).join(" / ");
+  console.log("[ " + ServerList + " ]");
+  console.log("Ready!");
+});
+
+bot.on("voiceChannelJoin", (member, newChannel) => {
+  const textChannel = newChannel.guild.channels.find(
+    channel => (channel.type === 0, channel.name === "spam")
+  );
+
+  if (textChannel === undefined) {
+    return;
+  }
+
+  if (member.nick === null) {
+    bot.createMessage(
+      textChannel.id,
+      `🔹 [ Join ]\n　　　**${member.username}**： **${newChannel.name}**`
+    );
+  } else {
+    bot.createMessage(
+      textChannel.id,
+      `🔹 [ Join ]\n　　　**${member.nick}**： **${newChannel.name}**`
+    );
+  }
+});
+
+bot.on("voiceChannelLeave", (member, oldChannel) => {
+  const textChannel = oldChannel.guild.channels.find(
+    channel => (channel.type === 0, channel.name === "spam")
+  );
+
+  if (textChannel === undefined) {
+    return;
+  }
+
+  if (member.nick === null) {
+    bot.createMessage(
+      textChannel.id,
+      `	💤 [ Leave ]\n　　　**${member.username}**`
+    );
+  } else {
+    bot.createMessage(textChannel.id, `	💤 [ Leave ]\n　　　**${member.nick}**`);
+  }
+});
+
+bot.on("voiceChannelSwitch", (member, newChannel, oldChannel) => {
+  const textChannel = oldChannel.guild.channels.find(
+    channel => (channel.type === 0, channel.name === "spam")
+  );
+
+  if (textChannel === undefined) {
+    return;
+  }
+
+  if (member.nick === null) {
+    bot.createMessage(
+      textChannel.id,
+      `🔸 [ Move ]\n　　　**${member.username}**： **${oldChannel.name}**  >>  **${newChannel.name}**`
+    );
+  } else {
+    bot.createMessage(
+      textChannel.id,
+      `🔸 [ Move ]\n　　　**${member.nick}**： **${oldChannel.name}**  >>  **${newChannel.name}**`
+    );
+  }
+});
+
+// BotをDiscordに接続
+bot.connect();
+
+client.on("message", message => {
+  if (message.author.bot) return; // bot自身の発言は無視
+
+  if (message.content.includes("everyone")) return; // everyoneを無視
+
+  // 敗北者
+  if (message.content.includes("敗北者")) {
+    message.channel.send(
+      "ハァ...ハァ...敗北者...?\n取り消せよ...!!今の言葉...!!"
+    );
+    return;
+  }
+
+  // mention
+  if (message.isMemberMentioned(client.user)) {
+    message.reply("問題が発生した時は、Noko#2123 に連絡してください。");
+    return;
+  }
+
+  if (message.content.includes("記録")) {
+    message.channel.send(
+      "https://docs.google.com/spreadsheets/d/1yZkRn0KHqJjHKw3d3LSUEJCZt2WegybeTrMSfjyu0V0/edit#gid=56667276"
+    );
+    return;
+  }
+
+  if (message.content.startsWith("$")) {
+    args = message.content
+      .slice(prefix.length)
+      .trim()
+      .split(/ +/g);
+    command = args.shift().toLowerCase();
+  } else {
+    args = 0;
+    command = 0;
+  }
+
+  //Tenhou Reset Room ID
+  if (command === "resetroom") {
+    setroomid = null;
+    message.channel.send("ルームIDの固定を解除しました");
+    return;
+  }
+
+  //Tenhou Set Room ID
+
+  var roomrep = message.content.replace(/^\$setroom /, "");
+
+  if (command === "setroom") {
+    if (
+      roomrep >= 1000 &&
+      roomrep <= 7999 &&
+      roomrep.length === 4 && //文字数指定
+      /\d{4}/.test(roomrep) && //正規表現(0x1F1Fみたいなのはじくやつ)
+      Number.isInteger(Number(roomrep)) //自然数のみのやつ？しらんけど
+    ) {
+      setroomid = roomrep;
+      message.channel.send("ルームIDを " + setroomid + " に固定しました");
+      return;
+    } else {
+      message.channel.send(
+        "ルームIDは 半角数字で `1000 ~ 7999` の中から指定してください"
+      );
+      return;
+    }
+  }
+
+  //ランダム
+  var roomidMIN = 1000;
+  var roomidMAX = 7999;
+
+  var roomid =
+    Math.floor(Math.random() * (roomidMAX + 1 - roomidMIN)) + roomidMIN;
+
+  //Tenhou room
+  if (command === "room") {
+    if (setroomid == null) {
+      message.channel.send(
+        "ルームIDは " +
+          roomid +
+          " です\n固定する場合は、`$setroom " +
+          roomid +
+          "` と入力してください\nhttps://tenhou.net/0/?" +
+          roomid
+      );
+      return;
+    } else {
+      message.channel.send(
+        "ルームIDは " +
+          setroomid +
+          " で固定中です\n固定を解除する場合は、`$resetroom` と入力してください"
+      );
+      message.channel.send("https://tenhou.net/0/?" + setroomid);
+      return;
+    }
+  }
+
+  //確認用
+  if (command === "id") {
+    message.channel.send("roomid: " + roomid + " | setroomid: " + setroomid);
+    return;
+  }
+
+  //$rps
+  if (command === "rps") {
+    let replies = ["r", "p", "s"];
+    let result = Math.floor(Math.random() * replies.length);
+
+    let uReply = args[0];
+    if (!uReply)
+      return message.channel.send(
+        `**$rps <?>**　と打ってください： /n\`r (グー) , p (パー) , s (チョキ)\``
+      );
+    if (!replies.includes(uReply))
+      return message.channel.send(
+        `この中からえらんでください：/n\`r (グー) , p (パー) , s (チョキ)\``
+      );
+    //rock
+    else if (uReply === "r") {
+      console.log(replies[result]);
+      if (replies[result] === "r")
+        return message.channel.send(
+          "[YOU]   :right_facing_fist:  vs  :left_facing_fist:   [BOT]\n　　 引き分けで～～す"
+        );
+      if (replies[result] === "p")
+        return message.channel.send(
+          "[YOU]   :right_facing_fist:  vs  :raised_hand:   [BOT]\n　　 あなたの負けです"
+        );
+      else
+        return message.channel.send(
+          "[YOU]   :right_facing_fist:  vs  :metal:   [BOT]\n　　 あなたの勝ち！"
+        );
+    }
+
+    //paper
+    else if (uReply === "p") {
+      console.log(replies[result]);
+      if (replies[result] === "p")
+        return message.channel.send(
+          "[YOU]   :raised_back_of_hand:  vs  :raised_hand:   [BOT]\n　 引き分けで～～～す"
+        );
+      if (replies[result] === "s")
+        return message.channel.send(
+          "[YOU]   :raised_back_of_hand:  vs  :metal:   [BOT]\n　 あなたの負けで～す"
+        );
+      else
+        return message.channel.send(
+          "[YOU]   :raised_back_of_hand:  vs  :left_facing_fist:   [BOT]\n　 あなたの勝ちです！"
+        );
+    }
+
+    //scissors
+    else if (uReply === "s") {
+      console.log(uReply);
+      console.log(replies[result]);
+      if (replies[result] === "s")
+        return message.channel.send(
+          "[YOU]   :v:  vs  :metal:   [BOT]\n　 引き分けで～～～す"
+        );
+      if (replies[result] === "r")
+        return message.channel.send(
+          "[YOU]   :v:  vs  :left_facing_fist:   [BOT]\n　 あなたの負けで～す"
+        );
+      else
+        return message.channel.send(
+          "[YOU]   :v:  vs  :raised_hand:   [BOT]\n　 あなたの勝ちです！"
+        );
+    }
+  }
+
+  //cry
+  if (command === "cry") {
+    message.channel.send(
+      "thunder, sword in his hand\nTitans of justice, fearless we stand\nCry thunder, strong in command\nBlessed by the union, freedom of man"
+    );
+    return;
+  }
+
+  //seasons
+  if (command === "seasons") {
+    message.channel.send(
+      "The words are dying in the night\nNo winter lasts forever\nThe seasons pass and the sunlight will shine\nOn my life again\nSo let the past now burn down in flames"
+    );
+    return;
+  }
+
+  //uouo
+  if (command === "uouo") {
+    message.channel.send("₍₍⁽⁽:crab:₎₎⁾⁾ウオウオ");
+    return;
+  }
+
+  //huruete nemure
+  if (command === "えて眠れ") {
+    message.channel.send("<:aaa:663688535236149271>");
+    return;
+  }
+
+  //thinking pistol
+  if (command === "suicide") {
+    message.channel.send("<:thinkingpistol:663690728106360842>");
+    return;
+  }
+
+  //usebrain
+  if (command === "usebrain") {
+    message.channel.send("<:usebrain:663690746192461824>");
+    return;
+  }
+
+  //kawa nutte kawa kawa kono kawaranai hibi wo
+  if (command === "kawa") {
+    message.channel.send(
+      "https://twitter.com/mahjong_megure/status/1205891322948673536?s=20"
+    );
+    return;
+  }
+
+  //kusoga
+  if (command === "kusoga") {
+    message.channel.send("クソとか言うなクソが");
+    return;
+  }
+
+  //car
+  if (command === "car") {
+    message.channel
+      .send("...............🚗......")
+      .then(Car => Car.edit("............🚗........."))
+      .then(Car => Car.edit("........🚗............"))
+      .then(Car => Car.edit(".....🚗..............."))
+      .then(Car => Car.edit("..🚗.................."))
+      .then(Car => Car.edit("🚗...................."))
+      .then(Car => Car.edit("😮....🚗.............."))
+      .then(Car => Car.edit(".😧..🚗......................"))
+      .then(Car => Car.edit("..:tired_face:.:red_car:......................"))
+      .then(Car => Car.edit("...:ghost::red_car:......................"));
+    return;
+  }
+
+  //bosyu
+
+  if (command === "bosyu" && !RcheckOn) {
+    message.channel.send("`$boend`で募集を終了します")
+    if (args[0] === undefined) {
+      var bosyuTitle = "Users";
+    } else {
+      var bosyuTitle = args[0];
+    }
+    var RListOld = new RichEmbed().setTitle(bosyuTitle);
+    RcheckOn = true;
+    message.channel.send(RListOld).then(message => {
+      message.react("🔼");
+      var messageId = 0;
+
+      function addo(reaction, user) {
+        if (user.bot) {
+          messageId = message.id;
+          return;
+        }
+        if (!user.bot && RcheckOn && reaction.message.id === messageId) {
+          ReactuserList.push(user.username);
+          var RListB = ReactuserList.join("\n");
+          var RListNew = new RichEmbed()
+            .setTitle(bosyuTitle)
+            .setDescription(RListB);
+          message.edit(RListNew);
+        }
+      }
+
+      function remobe(reaction, user) {
+        if (RcheckOn && reaction.message.id === messageId) {
+          ReactuserList.splice(ReactuserList.indexOf(user.username), "1");
+          var RListB = ReactuserList.join("\n");
+          var RListNew = new RichEmbed()
+            .setTitle(bosyuTitle)
+            .setDescription(RListB);
+          message.edit(RListNew);
+        }
+      }
+
+      function stpo(message) {
+        if (command === "boend") {
+          if (message.author.bot) return;
+          RcheckOn = false;
+          ReactuserList.length = 0;
+          client.removeListener("messageReactionAdd", addo);
+          client.removeListener("messageReactionRemove", remobe);
+          client.removeListener("message", stpo);
+          message.channel.send("募集を停止します");
+        }
+      }
+
+      client.on("messageReactionAdd", addo);
+
+      client.on("messageReactionRemove", remobe);
+
+      client.on("message", stpo);
+    });
+    return;
+  }
+
+  //test1　遺産
+  if (command === "test1") {
+    message.channel
+      .send({
+        embed: {
+          title: "麻雀 結果記録",
+          fields: [
+            {
+              name: "対戦をしたプレイヤーを選択してください",
+              value:
+                ":one:　えくめあ\n:two:　Noko\n:three:　アクセラ\n:four:　むぎちょこ\n:five:　げきおわた\n:six:　nuzojon\n:seven:　IRK\n:eight:　やみうどん\n:nine:　ちあ",
+              inline: false
+            }
+          ]
+        }
+      })
+      .then(message =>
+        message
+          .react("1️⃣")
+          .then(() => message.react("2️⃣"))
+          .then(() => message.react("3️⃣"))
+          .then(() => message.react("4️⃣"))
+          .then(() => message.react("5️⃣"))
+          .then(() => message.react("6️⃣"))
+          .then(() => message.react("7️⃣"))
+          .then(() => message.react("8️⃣"))
+          .then(() => message.react("9️⃣"))
+          .catch(e => message.channel.send("error"))
+      );
+    return;
+  }
+
+  //test2 空き
+  if (command === "test2") {
+    //here
+    return;
+  }
+
+  //test3 空き
+  if (command === "test3") {
+    //here
+    return;
+  }
+
+  //test4
+  if (command === "test4") {
+    //here
+    return;
+  }
+
+  //test5 Embed Sample
+  const EmbedSample = new RichEmbed()
+    .setTitle("3")
+    .setAuthor("3")
+    .setDescription("33")
+    .addField("3333", "33333333")
+    .setImage("https://i.imgur.com/wSTFkRM.png")
+    .setColor(8011653);
+
+  if (command === "test5") {
+    message.channel.send(EmbedSample);
+    return;
+  }
+
+  //test6
+  if (command === "test6") {
+    //here
+    return;
+  }
+
+  //help
+  const Embednkhelp = new RichEmbed()
+    .setTitle("ヘルプ")
+    .setDescription(
+      "通話に入退出したユーザーを #spam で通知します\n#spam という名前のチャンネルがない場合は通知しません"
+    )
+    .addField("$nkcommand", "コマンド一覧を表示します")
+    .addField("$nkstamp", "定型文・絵文字一覧を表示します")
+    .setFooter("チャットに「敗北者」という文字を混ぜると...?")
+    .setColor(8011653);
+
+  if (command === "nkhelp") {
+    message.channel.send(Embednkhelp);
+    return;
+  }
+
+  //help nkcommand
+  const Embednkcmd = new RichEmbed()
+    .setTitle("コマンド")
+    .addField("$rps [r/p/s]", "BOTとじゃんけん勝負！")
+    .addField("$cry", "Dragonforce - Cry Thunder を歌います")
+    .addField("$seasons", "Dragonforce - Seasons を歌います")
+    .addField("$car", "car")
+    .addField("$room", "天鳳の部屋を生成します")
+    .addField("$setroom", "天鳳のルームIDを固定します")
+    .addField("$resetroom", "ルームIDの固定を解除します")
+    .addField("$link", "リンク集を表示します")
+    .addField("$nkcommand", "コマンド一覧を表示します")
+    .addField("$nkstamp", "定型文・絵文字一覧を表示します")
+    .addField("$bosyu <Title>", "募集をします タイトルは自由です")
+    .addField("$boend", "募集を終了します")
+    .setColor(8011653);
+
+  if (command === "nkcommand") {
+    message.channel.send(Embednkcmd);
+    return;
+  }
+
+  //help nkstamp
+  const Embednkstamp = new RichEmbed()
+    .setTitle("定型文・絵文字")
+    .addField("$えて眠れ", "<:aaa:663688535236149271>")
+    .addField("$suicide", "<:thinkingpistol:663690728106360842>")
+    .addField("$usebrain", "<:usebrain:663690746192461824>")
+    .addField("$kusoga", "クソが")
+    .addField("$kawa", "ﾉﾘ 塗って ﾉﾘ ﾉﾘ")
+    .setColor(8011653);
+
+  if (command === "nkstamp") {
+    message.channel.send(Embednkstamp);
+    return;
+  }
+
+  const Embednklink = new RichEmbed()
+    .setTitle("リンク集")
+    .addField(
+      "口臭警部 麻雀部 season 3",
+      "[Here](https://docs.google.com/spreadsheets/d/1yZkRn0KHqJjHKw3d3LSUEJCZt2WegybeTrMSfjyu0V0/edit?usp=sharing)"
+    )
+    .addField(
+      "Ultimate OX",
+      "[Here](https://docs.google.com/spreadsheets/d/1N5RcAbM8mnGes76pdStNCrZF7ER5d-JgMyAr1Sr_irY/edit?usp=sharing)"
+    )
+    .addField(
+      "制限しりとり",
+      "[Here](https://docs.google.com/spreadsheets/d/1Y7I7XkcByjuFubB8giDKRaMe-yvUhRRV-7v1usx5WxE/edit?usp=sharing)"
+    )
+    .addField(
+      "pp Calculator (ver.1.1)",
+      "[Here](https://docs.google.com/spreadsheets/d/1_oLAI7-Ql53nNhpA4AyiqyIxJdZfUImUV2sXV9aE0yk/edit?usp=sharing)"
+    )
+    .addField(
+      "helloSpreadSheet",
+      "[ここ](https://docs.google.com/spreadsheets/d/1sSqLnk_AuNj03O2hHhwSuQaX_tsDKHpby1wDdsNC2k4/edit#gid=0)[を](https://ja.uncyclopedia.info/wiki/%E3%82%92)[Here](https://docs.google.com/spreadsheets/d/1sSqLnk_AuNj03O2hHhwSuQaX_tsDKHpby1wDdsNC2k4/edit#gid=0)！"
+    )
+    .addField("BoardGameArena", "[Here](https://ja.boardgamearena.com/)")
+    .setColor(8011653);
+
+  if (command === "link") {
+    message.channel.send(Embednklink);
+    return;
+  }
+});
+
+if (process.env.DISCORD_BOT_TOKEN == undefined) {
+  console.log("please set ENV: DISCORD_BOT_TOKEN");
+  process.exit(0);
+}
+
+client.login(process.env.DISCORD_BOT_TOKEN);

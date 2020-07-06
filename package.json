@@ -1,0 +1,21 @@
+{
+  "name": "Taokaka-discord-bot",
+  "version": "1.0.0",
+  "description": "discord bot",
+  "main": "main.js",
+  "dependencies": {
+    "discord.js": "^12.2.0",
+    "eris": "^0.13.1",
+    "python": "^0.0.4",
+    "python-bridge": "^1.1.0"
+  },
+  "engines": {
+    "node": "12.x"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node main.js",
+    "test": "node main.js"
+  },
+  "license": "MIT"
+}
