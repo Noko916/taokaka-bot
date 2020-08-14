@@ -103,7 +103,6 @@ client.on("message", async message => {
     return;
   }
   console.log(`${message.author.tag} to cite [${message.content}]`);
-  const guild_id = results[1];
   const channel_id = results[2];
   const message_id = results[3];
 
@@ -114,21 +113,22 @@ client.on("message", async message => {
 
   channel.messages
     .fetch(message_id)
-    .then(msg =>
+    .then(message =>
       message.channel.send({
         embed: {
           author: {
-            name: msg.member.displayName,
-            icon_url: msg.member.user.displayAvatarURL()
+            name: message.member.displayName,
+            icon_url: message.member.user.displayAvatarURL()
           },
           image: {
             url: message.attachments.map(attachment => attachment.url)[0]
           },
-          description: msg.content,
+          description: message.content,
           footer: {
-            text: `${msg.guild.name} #${msg.channel.name}`
+            text: `${message.guild.name} #${message.channel.name}`,
+            icon_url: message.guild.iconURL()
           },
-          timestamp: msg.createdTimestamp
+          timestamp: message.createdTimestamp
         }
       })
     )
