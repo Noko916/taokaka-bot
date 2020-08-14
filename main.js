@@ -121,6 +121,9 @@ client.on("message", async message => {
             name: msg.member.displayName,
             icon_url: msg.member.user.displayAvatarURL()
           },
+          image: {
+            url: message.attachments.map(attachment => attachment.url)[0]
+          },
           description: msg.content,
           footer: {
             text: `${msg.guild.name} #${msg.channel.name}`
