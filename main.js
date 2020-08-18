@@ -102,7 +102,11 @@ client.on("message", async message => {
   if (!results) {
     return;
   }
+
+  const sendch_id = message.channel.id;
+
   console.log(`${message.author.tag} to cite [${message.content}]`);
+  const guild_id = results[1];
   const channel_id = results[2];
   const message_id = results[3];
 
@@ -111,28 +115,24 @@ client.on("message", async message => {
     return;
   }
 
-  channel.messages
-    .fetch(message_id)
-    .then(message =>
-      message.channel.send({
-        embed: {
-          author: {
-            name: message.member.displayName,
-            icon_url: message.member.user.displayAvatarURL()
-          },
-          image: {
-            url: message.attachments.map(attachment => attachment.url)[0]
-          },
-          description: message.content,
-          footer: {
-            text: `${message.guild.name} #${message.channel.name}`,
-            icon_url: message.guild.iconURL()
-          },
-          timestamp: message.createdTimestamp
-        }
-      })
+
+  channel.messages.fetch(message_id);
+
+  const cEmbed = new Discord.MessageEmbed()
+    .setAuthor(
+      `${message.member.displayName}`,
+      `${message.member.user.displayAvatarURL}`
     )
-    .catch(console.error);
+    .setDescription(`${message.content}`)
+    .setImage(`${message.attachments.map(attachment => attachment.url)[0]}`)
+    .setFooter(
+      `${message.guild.name} #${message.channel.name}`,
+      `${message.guild.iconURL}`
+    )
+    .setTimestamp(`${message.createdTimestamp}`);
+
+  client.channels.cache.get(sendch_id).send(cEmbed);
+
 });
 
 // BotをDiscordに接続
