@@ -121,13 +121,13 @@ client.on("message", async message => {
   const cEmbed = new Discord.MessageEmbed()
     .setAuthor(
       `${message.member.displayName}`,
-      `${message.member.user.displayAvatarURL}`
+      `${message.member.user.displayAvatarURL()}`
     )
     .setDescription(`${message.content}`)
     .setImage(`${message.attachments.map(attachment => attachment.url)[0]}`)
     .setFooter(
       `${message.guild.name} #${message.channel.name}`,
-      `${message.guild.iconURL}`
+      `${message.guild.iconURL()}`
     )
     .setTimestamp(`${message.createdTimestamp}`);
 
