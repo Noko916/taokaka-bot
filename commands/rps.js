@@ -7,11 +7,11 @@ exports.run = (client, message, args) => {
   let uReply = args[0];
   if (!uReply)
     return message.channel.send(
-      `**$rps <?>**　と打ってください： /n\`r (グー) , p (パー) , s (チョキ)\``
+      `**$rps <?>**　と打ってください： \n\`r (グー) , p (パー) , s (チョキ)\``
     );
   if (!replies.includes(uReply))
     return message.channel.send(
-      `この中からえらんでください：/n\`r (グー) , p (パー) , s (チョキ)\``
+      `この中からえらんでください：\n\`r (グー) , p (パー) , s (チョキ)\``
     );
   //rock
   else if (uReply === "r") {
