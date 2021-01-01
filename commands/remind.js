@@ -12,7 +12,8 @@ exports.run = (client, message, args) => {
     reptime.replace(`d`, "日 ");
     reptime.replace(`h`, "時間 ");
     reptime.replace(`m`, "分 ");
-    reptime.replace(`s`, "秒");
+    //reptime.replace(`s`, "秒");
+    reptime.replace("秒", `s`);
 
     if(!remindtime) return message.reply(":x: 時間を入力してください `例: .remind 10s aiueo`");
     if(!reason)     return message.reply(":x: 内容を入力してください `例: .remind 10s aiueo`");
