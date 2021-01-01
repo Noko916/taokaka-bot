@@ -18,7 +18,7 @@ exports.run = (client, message, args) => {
 
         if (Date.now() > db.fetch(`remind.${message.author.id}`)) {
             db.delete(`remind.${message.author.id}`);
-            message.channel.send(`${message.author}\n**Remind:** ${reason}`)
+            message.channel.send(`**Remind: **[${message.author}]\n> ${reason}`)
                            .catch(e => console.log(e));
             clearInterval(interval);
         }
