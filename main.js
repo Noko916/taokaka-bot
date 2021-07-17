@@ -84,12 +84,12 @@ bot.on("voiceChannelSwitch", (member, newChannel, oldChannel) => {
   if (member.nick === null) {
     bot.createMessage(
       textChannel.id,
-      `🔸 [ Move ]\n　　　**${member.username}**： **${oldChannel.name}**  >>  **${newChannel.name}**`
+      `🔸 [ Move ]\n　　　**${member.username}**： **${oldChannel.name}**  >>  **${newChannel.id}**`
     );
   } else {
     bot.createMessage(
       textChannel.id,
-      `🔸 [ Move ]\n　　　**${member.nick}**： **${oldChannel.name}**  >>  **${newChannel.name}**`
+      `🔸 [ Move ]\n　　　**${member.nick}**： **${oldChannel.name}**  >>  **${newChannel.id}**`
     );
   }
 });
