@@ -43,12 +43,12 @@ bot.on("voiceChannelJoin", (member, newChannel) => {
   if (member.nick === null) {
     bot.createMessage(
       textChannel.id,
-      `🔹 [ Join ]\n　　　**${member.username}**： **${newChannel.name}**`
+      `🔹 [ Join ]\n　　　**${member.username}**： **<#${newChannel.id}>**`
     );
   } else {
     bot.createMessage(
       textChannel.id,
-      `🔹 [ Join ]\n　　　**${member.nick}**： **${newChannel.name}**`
+      `🔹 [ Join ]\n　　　**${member.nick}**： **<#${newChannel.id}>**`
     );
   }
 });
