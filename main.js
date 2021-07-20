@@ -163,7 +163,7 @@ client.on("message", message => {
   if (message.channel.type == "dm") {
     message.channel.send("foeiwwfjewoawp")
       .then(message.react("🔼"));
-    console.log("aaa");
+    console.log("aa");
     return;
   }
   
